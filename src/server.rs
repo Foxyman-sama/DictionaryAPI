@@ -20,6 +20,6 @@ pub async fn start() -> tide::Result<()> {
 
 async fn receive_request(req: Request<()>) -> tide::Result {
     let word = req.param("word").unwrap_or("error");
-    println!("User's word: {}", word);
-    Ok(format!("Your word: {}", word).into())
+    let answer = handler::word_handler(word);
+    Ok(format!("{}", answer).into())
 }
