@@ -3,7 +3,7 @@ use tide::Request;
 #[path = "handler.rs"]
 mod handler;
 
-const ENTRY_POINT: &'static str = "/";
+const ENTRY_POINT: &'static str = "/:word";
 const DEFAULT_ADDRESS: &'static str = "127.0.0.1:8080";
 
 #[derive(Debug, Deserialize)]
@@ -13,7 +13,7 @@ struct Word {
 
 pub async fn start() -> tide::Result<()> {
     let mut app = tide::new();
-    app.at("/:word").get(receive_request);
+    app.at(ENTRY_POINT).get(receive_request);
     app.listen(DEFAULT_ADDRESS).await?;
     Ok(())
 }
