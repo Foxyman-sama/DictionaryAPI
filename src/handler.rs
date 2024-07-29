@@ -8,6 +8,8 @@ const PART_OF_SPEECH_INDEX: usize = 2;
 const SPHERE_INDEX: usize = 3;
 const DESCRIPTION_INDEX: usize = 4;
 
+const ERROR_JSON: &'static str = r#"{"status":"not found"}"#;
+
 #[derive(Debug, Serialize, Deserialize)]
 struct Translation {
   part_of_speech: String,
@@ -20,7 +22,11 @@ pub fn make_responce_from_db(word: &str) -> String {
   let rows = db.get(word);
   let translations = make_translations_from_rows(rows);
 
-  generate_successful_json(translations)
+  if translations.len() > 0 {
+    generate_successful_json(translations)
+  } else {
+    generate_error_json()
+  }
 }
 
 fn make_translations_from_rows(rows: Vec<postgres::Row>) -> Vec<Translation> {
@@ -52,6 +58,10 @@ fn generate_successful_json(translations: Vec<Translation>) -> String {
   format!("{{\"status\":true,\"translations\":{}}}", json)
 }
 
+fn generate_error_json() -> String {
+  String::from(ERROR_JSON)
+}
+
 #[cfg(test)]
 mod handler_tests {
   use super::*;
@@ -59,7 +69,7 @@ mod handler_tests {
   const TEST_JSON: &'static str =
     r#"{"status":true,"translations":[{"part_of_speech":"дієслово","sphere":"загальна","description":"отримати"}]}"#;
 
-  const TEST_RESPONCE: &'static str = r#"{"status":true,"translations":[{"part_of_speech":"null","sphere":"null","description":"словах,с общим значением удаления"}]}"#;
+  const TEST_SUCCESSFUL_RESPONCE: &'static str = r#"{"status":true,"translations":[{"part_of_speech":"null","sphere":"null","description":"словах,с общим значением удаления"}]}"#;
 
   #[test]
   fn check_generation_of_successful_json_string() {
@@ -78,6 +88,13 @@ mod handler_tests {
   fn check_generation_of_making_responce_fromb_db() {
     let actual = make_responce_from_db("ab-");
 
-    assert_eq!(TEST_RESPONCE, actual);
+    assert_eq!(TEST_SUCCESSFUL_RESPONCE, actual);
+  }
+
+  #[test]
+  fn return_error_responce_when_word_doesnt_exist() {
+    let actual = make_responce_from_db("fjdsfidsfjsdfh");
+
+    assert_eq!(ERROR_JSON, actual);
   }
 }
