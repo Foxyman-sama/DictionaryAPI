@@ -1,16 +1,20 @@
-use std::fmt::format;
-
 use postgres::{Client, NoTls};
+use tide::http::headers::HOST;
+
+const HOSTNAME: &'static str = "localhost";
+const USERNAME: &'static str = "postgres";
+const PASSWORD: &'static str = "root"; // it seems strange to set it like this, hahaha
+const DBNAME: &'static str = "dictionary";
 
 pub struct Database {
   client: Client,
 }
 
 impl Database {
-  pub fn new(args: &[&str]) -> Database {
+  pub fn connect() -> Database {
     let args = format!(
       "host={} user={} password={} dbname={}",
-      args[0], args[1], args[2], args[3]
+      HOSTNAME, USERNAME, PASSWORD, DBNAME
     );
     Database {
       client: Client::connect(args.as_str(), NoTls).unwrap(),
@@ -31,7 +35,7 @@ mod database_tests {
 
   #[test]
   fn can_get_value_from_db() {
-    let mut database = Database::new(&["localhost", "postgres", "root", "dictionary"]);
+    let mut database = Database::connect();
 
     let actual = database.get("ab-");
     let actual: &str = actual[0].get(1);
