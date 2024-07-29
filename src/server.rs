@@ -1,15 +1,9 @@
-use serde::Deserialize;
 use tide::Request;
 #[path = "handler.rs"]
 mod handler;
 
 const ENTRY_POINT: &'static str = "/:word";
 const DEFAULT_ADDRESS: &'static str = "127.0.0.1:8080";
-
-#[derive(Debug, Deserialize)]
-struct Word {
-  word: String,
-}
 
 pub async fn start() -> tide::Result<()> {
   let mut app = tide::new();

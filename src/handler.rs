@@ -30,22 +30,19 @@ pub fn make_responce_from_db(word: &str) -> String {
 }
 
 fn make_translations_from_rows(rows: Vec<postgres::Row>) -> Vec<Translation> {
-  let mut translations = Vec::new();
+  rows.iter().map(|row| make_translation(&row)).collect()
+}
 
-  for row in rows {
-    let part_of_speech = try_get(&row, PART_OF_SPEECH_INDEX);
-    let sphere = try_get(&row, SPHERE_INDEX);
-    let description = try_get(&row, DESCRIPTION_INDEX);
-    let transl = Translation {
-      part_of_speech,
-      sphere,
-      description,
-    };
+fn make_translation(row: &postgres::Row) -> Translation {
+  let part_of_speech = try_get(&row, PART_OF_SPEECH_INDEX);
+  let sphere = try_get(&row, SPHERE_INDEX);
+  let description = try_get(&row, DESCRIPTION_INDEX);
 
-    translations.push(transl)
+  Translation {
+    part_of_speech,
+    sphere,
+    description,
   }
-
-  translations
 }
 
 fn try_get(row: &postgres::Row, index: usize) -> String {
